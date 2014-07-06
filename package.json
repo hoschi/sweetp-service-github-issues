@@ -1,24 +1,20 @@
 {
   "name": "sweetp-github-issues",
-  "version": "0.0.0",
-  "main": "lib/sweetp-github-issues.js",
+  "version": "0.1.0",
+  "main": "main.js",
   "description": "Sweetp service for Github issues.",
-  "homepage": "https://github.com/sweetp/sweetp-github-issues",
-  "bugs": "https://github.com/sweetp/sweetp-github-issues/issues",
+  "homepage": "https://github.com/sweetp/service-github-issues",
+  "bugs": "https://github.com/sweetp/service-github-issues/issues",
   "author": {
     "name": "Stefan Gojan",
     "email": "vollekannehoschi@gmail.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/sweetp/sweetp-github-issues"
+    "url": "https://github.com/sweetp/service-github-issues"
   },
-  "license": "MIT",
-  "files": [
-    "lib"
-  ],
+  "license": "GPL",
   "keywords": [
-    "sweetp-github-issues",
     "sweetp",
     "github",
     "issues",
@@ -26,7 +22,6 @@
   ],
   "devDependencies": {
     "grunt-contrib-jshint": "^0.10.0",
-    "grunt-contrib-nodeunit": "^0.3.3",
     "grunt-contrib-watch": "^0.6.1",
     "load-grunt-tasks": "^0.4.0",
     "time-grunt": "^0.3.1",
