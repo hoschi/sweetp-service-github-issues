@@ -49,8 +49,11 @@ module.exports = function(grunt) {
                 tasks: ['jshint:src', 'mochacov:unit']
             },
             test: {
-                files: '<%= jshint.test.src %>',
-                tasks: ['jshint:test', 'mochacov:unit']
+                files: [
+					'<%= jshint.src.src %>',
+					'<%= jshint.test.src %>'
+				],
+                tasks: ['jshint', 'mochacov:unit']
             }
         }
     });

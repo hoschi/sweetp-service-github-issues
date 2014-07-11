@@ -1,42 +1,43 @@
 {
-    "name": "sweetp-github-issues",
-    "version": "0.1.0",
-    "main": "main.js",
-    "description": "Sweetp service for Github issues.",
-    "homepage": "https://github.com/sweetp/service-github-issues",
-    "bugs": "https://github.com/sweetp/service-github-issues/issues",
-    "author": {
-        "name": "Stefan Gojan",
-        "email": "vollekannehoschi@gmail.com"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/sweetp/service-github-issues"
-    },
-    "license": "GPL",
-    "keywords": [
-        "sweetp",
-        "github",
-        "issues",
-        "tickets"
-    ],
-    "devDependencies": {
-        "grunt-contrib-jshint": "^0.10.0",
-        "grunt-contrib-watch": "^0.6.1",
-        "load-grunt-tasks": "^0.4.0",
-        "time-grunt": "^0.3.1",
-        "jshint-stylish": "^0.2.0",
-        "grunt-mocha-cov": "~0.2.1",
-        "chai": "~1.9.1"
-    },
-    "dependencies": {
-        "sweetp-base": "~0.6"
-    },
-	"config": {
-		"blanket": {
-			"pattern": [
-				"src"
-			]
-		}
-	}
+  "name": "sweetp-github-issues",
+  "version": "0.1.0",
+  "main": "main.js",
+  "description": "Sweetp service for Github issues.",
+  "homepage": "https://github.com/sweetp/service-github-issues",
+  "bugs": "https://github.com/sweetp/service-github-issues/issues",
+  "author": {
+    "name": "Stefan Gojan",
+    "email": "vollekannehoschi@gmail.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/sweetp/service-github-issues"
+  },
+  "license": "GPL",
+  "keywords": [
+    "sweetp",
+    "github",
+    "issues",
+    "tickets"
+  ],
+  "devDependencies": {
+    "grunt-contrib-jshint": "^0.10.0",
+    "grunt-contrib-watch": "^0.6.1",
+    "load-grunt-tasks": "^0.4.0",
+    "time-grunt": "^0.3.1",
+    "jshint-stylish": "^0.2.0",
+    "grunt-mocha-cov": "~0.2.1",
+    "chai": "~1.9.1",
+    "nock": "~0.42.1"
+  },
+  "dependencies": {
+    "sweetp-base": "~0.6"
+  },
+  "config": {
+    "blanket": {
+      "pattern": [
+        "src"
+      ]
+    }
+  }
 }
