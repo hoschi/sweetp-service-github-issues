@@ -1,5 +1,5 @@
 var sweetp = require("sweetp-base");
-var service = require("./lib/service.js");
+var service = require("./src/service.js");
 var methods, client;
 
 methods = sweetp.createMethods(service, "/tickets/");

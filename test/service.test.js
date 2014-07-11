@@ -1,7 +1,7 @@
 var chai = require('chai');
 chai.should();
 
-var s = require('../lib/service');
+var s = require('../src/service');
 
 describe('All method', function () {
 	var params;

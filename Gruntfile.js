@@ -16,8 +16,8 @@ module.exports = function(grunt) {
             gruntfile: {
                 src: 'Gruntfile.js'
             },
-            lib: {
-                src: ['lib/**/*.js']
+            src: {
+                src: ['src/**/*.js']
             },
             test: {
                 src: ['test/**/*.js']
@@ -25,28 +25,37 @@ module.exports = function(grunt) {
         },
         mochacov: {
             options: {
-                reporter: 'spec'
-                //require: ['should']
+				files: '<%= jshint.test.src %>'
             },
-            all: '<%= jshint.test.src %>'
+            unit:{
+				options:{
+					reporter: 'dot'
+				}
+			},
+            coverage:{
+				options:{
+					reporter: 'html-cov',
+					output: 'reports/coverage.html'
+				}
+			}
         },
         watch: {
             gruntfile: {
                 files: '<%= jshint.gruntfile.src %>',
                 tasks: ['jshint:gruntfile']
             },
-            lib: {
-                files: '<%= jshint.lib.src %>',
-                tasks: ['jshint:lib', 'nodeunit']
+            src: {
+                files: '<%= jshint.src.src %>',
+                tasks: ['jshint:src', 'mochacov:unit']
             },
             test: {
                 files: '<%= jshint.test.src %>',
-                tasks: ['jshint:test']
+                tasks: ['jshint:test', 'mochacov:unit']
             }
         }
     });
 
     // Default task.
-	grunt.registerTask('test', ['mochacov']);
+	grunt.registerTask('test', ['mochacov:unit']);
     grunt.registerTask('default', ['jshint', 'test']);
 };
