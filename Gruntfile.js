@@ -74,4 +74,5 @@ module.exports = function(grunt) {
     grunt.registerTask('codec', ['mochacov:lcov', 'codeclimate']);
     grunt.registerTask('test', ['mochacov:unit']);
     grunt.registerTask('default', ['jshint', 'test']);
+    grunt.registerTask('ci', ['jshint', 'test', 'codec']);
 };
