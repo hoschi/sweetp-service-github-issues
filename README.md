@@ -1,4 +1,4 @@
-[![Code Climate](https://codeclimate.com/github/hoschi/sweetp-service-github-issues/badges/gpa.svg)](https://codeclimate.com/github/hoschi/sweetp-service-github-issues) [![Test Coverage](https://codeclimate.com/github/hoschi/sweetp-service-github-issues/badges/coverage.svg)](https://codeclimate.com/github/hoschi/sweetp-service-github-issues)
+[![Code Climate](https://codeclimate.com/github/hoschi/sweetp-service-github-issues/badges/gpa.svg)](https://codeclimate.com/github/hoschi/sweetp-service-github-issues) [![Test Coverage](https://codeclimate.com/github/hoschi/sweetp-service-github-issues/badges/coverage.svg)](https://codeclimate.com/github/hoschi/sweetp-service-github-issues) [![Build Status](https://travis-ci.org/hoschi/sweetp-service-github-issues.svg?branch=develop)](https://travis-ci.org/hoschi/sweetp-service-github-issues)
 
 Sweetp service for Github issues.
 
