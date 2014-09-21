@@ -1,6 +1,7 @@
 var sweetp = require('sweetp-base');
 var _ = require('lodash');
 var GithubApi = require('github');
+var cacheManager = require('cache-manager');
 
 exports.defaultCredentialService =  'password/manager/get';
 exports.defaultCredentialKey =  'github';
@@ -75,6 +76,63 @@ exports.transformTicketResponse = function (ticket) {
 	]);
 };
 
+exports.getCacheKey = function (method, params) {
+	return method + JSON.stringify(params);
+};
+
+exports.memoryCache = cacheManager.caching({store:'memory', max: 100, ttl: 3 /* seconds*/});
+exports.eTagCache = cacheManager.caching({store:'memory', max: 100});
+var eTagDict = {};
+
+exports.callWithCache = function (id, get, callback) {
+	exports.memoryCache.wrap(id, function (setInMemoryCache) {
+		var eTag, writeToCacheAndReturn;
+
+		writeToCacheAndReturn = function (response) {
+			// save it in all caches
+			exports.eTagCache.set(id, response);
+			setInMemoryCache(null, response);
+		};
+
+		// not in cache, call API with or without etag
+		eTag = eTagDict[id];
+
+		get(eTag, function (err, response) {
+			if (err) {
+				return setInMemoryCache(new Error(err));
+			}
+
+			if (response.meta.status === "304 Not Modified") {
+				// nothing new, try to get response from second cache
+				response = exports.eTagCache.get(id);
+
+				if (response) {
+					// found response in second cache, return it
+					return writeToCacheAndReturn(response);
+				} else {
+					// cache result was dismissed by max length, we must fetch it again
+					// call API without etag to get fresh response
+					return get(null, function (err, response) {
+						if (err) {
+							return setInMemoryCache(new Error(err));
+						}
+
+						writeToCacheAndReturn(response);
+					});
+				}
+			} else {
+				// no error, no 304, server returned result
+
+				// save new etag
+				eTagDict[id] = response.meta.etag;
+
+				// return result
+				writeToCacheAndReturn(response);
+			}
+		});
+	}, callback);
+};
+
 exports.all = function (err, params, callback) {
 	var parseResponse;
 	if (err) { return callback(err); }
@@ -94,7 +152,7 @@ exports.all = function (err, params, callback) {
 	}
 
 	exports.getCredentials(params, function (err, credentials) {
-		var github, apiParams, overrides;
+		var github, apiParams, overrides, cacheKey;
 
 		// initialize api
 		github = new GithubApi(exports.config.githubApi);
@@ -112,6 +170,21 @@ exports.all = function (err, params, callback) {
 		});
 
 		// call api
-		github.issues.repoIssues(apiParams, parseResponse);
+		cacheKey = exports.getCacheKey('repoIssues', apiParams);
+		exports.callWithCache(cacheKey, function (eTag, callback) {
+			var finalParams;
+
+			finalParams = exports.applyETagToParams(eTag, _.cloneDeep(apiParams));
+			github.issues.repoIssues(finalParams, callback);
+		}, parseResponse);
 	});
+};
+
+exports.applyETagToParams = function (eTag, params) {
+	if (eTag && params) {
+		params.headers = params.headers || {};
+		params.headers['If-None-Match'] = eTag;
+	}
+
+	return params;
 };

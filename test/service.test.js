@@ -4,6 +4,217 @@ var _ = require('lodash');
 
 var s = require('../src/service');
 
+describe('Call with cache', function () {
+	var getTestResponseBase;
+
+	getTestResponseBase = function () {
+		var testResponseBasic;
+
+		testResponseBasic = ['foo'];
+		testResponseBasic.meta = {
+			status:"200",
+			etag:"myEtag"
+		};
+
+		return testResponseBasic;
+	};
+
+	beforeEach(function () {
+		s.memoryCache.reset();
+		s.eTagCache.reset();
+	});
+
+	it('should work when testing happy cases.', function (done) {
+		var id, testResponse, testResponse2;
+
+		id = "test-0";
+		testResponse = getTestResponseBase();
+		testResponse2 = getTestResponseBase();
+		testResponse2[0] = 'bar';
+		testResponse2.meta.etag = "myEtag2";
+
+		// set in cache
+		function get (eTagFromCacheForId, callback) {
+            should.not.exist(eTagFromCacheForId);
+			callback(undefined, testResponse);
+		}
+
+		function resultCallback (err, response) {
+            should.not.exist(err);
+			response.should.eql(testResponse);
+
+			s.memoryCache.get(id).should.eql(testResponse);
+			s.eTagCache.get(id).should.eql(testResponse);
+
+			// get from memory cache
+			s.callWithCache(id, undefined, resultCallbackWithMemoryCacheResult);
+		}
+
+		function resultCallbackWithMemoryCacheResult (err, response) {
+            should.not.exist(err);
+			response.should.eql(testResponse);
+
+			s.memoryCache.get(id).should.eql(testResponse);
+			s.eTagCache.get(id).should.eql(testResponse);
+
+			// remove from memory cache (simulate timeout)
+			s.memoryCache.del(id);
+
+			// and get from eTag cache
+			s.callWithCache(id, getWithETag, resultCallbackWithETagCacheResult);
+		}
+
+		function getWithETag (eTagFromCacheForId, callback) {
+            eTagFromCacheForId.should.equal("myEtag");
+			// don't return response, only meta, response should come from cache
+			callback(undefined, {
+				meta:{
+					status:"304 Not Modified"
+				}
+			});
+		}
+
+		function resultCallbackWithETagCacheResult (err, response) {
+            should.not.exist(err);
+			response.should.eql(testResponse);
+
+			// retrieval through eTag cache also refreshs memory cache
+			s.memoryCache.get(id).should.eql(testResponse);
+			s.eTagCache.get(id).should.eql(testResponse);
+
+			// remove from memory cache (simulate timeout)
+			s.memoryCache.del(id);
+
+			s.callWithCache(id, getWithChangedResult, resultCallbackWithChangedResult);
+		}
+
+		function getWithChangedResult (eTagFromCacheForId, callback) {
+            eTagFromCacheForId.should.equal("myEtag");
+			// return changed response with changed eTag
+			callback(undefined, testResponse2);
+		}
+
+		function resultCallbackWithChangedResult (err, response) {
+            should.not.exist(err);
+			response.should.eql(testResponse2);
+			response.meta.etag.should.equal("myEtag2");
+
+			// retrieval through eTag cache also refreshs memory cache
+			s.memoryCache.get(id).should.eql(testResponse2);
+			s.eTagCache.get(id).should.eql(testResponse2);
+
+			// remove from memory cache (simulate timeout)
+			s.memoryCache.del(id);
+
+			// trigger eTag cache again, this should still work when method
+			// under test saved new result for the not changed id
+			s.callWithCache(id, getWithETagOfChangedResult, resultCallbackWithETagCacheResultForChangedETag);
+		}
+
+		function getWithETagOfChangedResult (eTagFromCacheForId, callback) {
+            eTagFromCacheForId.should.equal("myEtag2");
+
+			// don't return response, only meta, response should come from cache
+			callback(undefined, {
+				meta:{
+					status:"304 Not Modified"
+				}
+			});
+		}
+
+		function resultCallbackWithETagCacheResultForChangedETag (err, response) {
+            should.not.exist(err);
+			response.should.eql(testResponse2);
+			response.meta.etag.should.equal("myEtag2");
+
+			// retrieval through eTag cache also refreshs memory cache
+			s.memoryCache.get(id).should.eql(testResponse2);
+			s.eTagCache.get(id).should.eql(testResponse2);
+
+			// remove from memory cache (simulate timeout)
+			s.memoryCache.del(id);
+			// remove from etag cache (simulate exhaustion of cache space)
+			s.eTagCache.del(id);
+
+			// now method under test can't return cache result from eTagCache
+			// when server response without a result and a 304, it must fetch
+			// it again
+			s.callWithCache(id, getWithETagOfChangedResultAndFetchSameResultForUndefinedETag, resultCallbackWithNewlyFetchedResponse);
+		}
+
+		function getWithETagOfChangedResultAndFetchSameResultForUndefinedETag (eTagFromCacheForId, callback) {
+			if (eTagFromCacheForId) {
+				// return 304 and trigger total cache miss, which triggers
+				// refetching. the else case of this if
+				callback(undefined, {
+					meta:{
+						status:"304 Not Modified"
+					}
+				});
+			} else {
+				// same result as the one which was in the cache before we
+				// simulated exhaustion of cache space
+				callback(undefined, testResponse2);
+			}
+		}
+
+		function resultCallbackWithNewlyFetchedResponse (err, response) {
+            should.not.exist(err);
+			response.should.eql(testResponse2);
+			response.meta.etag.should.equal("myEtag2");
+
+			// retrieval through eTag cache also refreshs memory cache
+			s.memoryCache.get(id).should.eql(testResponse2);
+			s.eTagCache.get(id).should.eql(testResponse2);
+
+			done();
+		}
+
+		s.callWithCache(id, get, resultCallback);
+	});
+
+	it('should pass errors always to result callback.', function (done) {
+		var id, testResponse, callCounter;
+
+		id = "test-0";
+		testResponse = getTestResponseBase();
+		callCounter = 0;
+
+		function get (eTag, callback) {
+			// simulate error when fething result
+			callback("my error");
+		}
+
+		function resultCallback (err) {
+			err.message.should.equal("my error");
+
+			s.callWithCache(id, getWithNotModifiedNotExistingReponse, resultCallback2);
+		}
+
+		function getWithNotModifiedNotExistingReponse (eTag, callback) {
+			if (callCounter === 0) {
+				callCounter++;
+				// respond with 304, but the cache hit is empty so it gets
+				// called again to fetch the content
+				callback(undefined, {
+					meta:{
+						status:"304 Not Modified"
+					}
+				});
+			} else {
+				callback("my second error");
+			}
+		}
+
+		function resultCallback2 (err) {
+			err.message.should.equal("my second error");
+			done();
+		}
+
+		s.callWithCache(id, get, resultCallback);
+	});
+});
+
 describe('Get credentials', function() {
     var params;
 
@@ -287,6 +498,41 @@ describe('Transform ticket response', function() {
             title: "Found a bug"
         });
     });
+});
+
+describe('Apply ETag to params', function () {
+	it('should handle non existing ETag.', function () {
+		s.applyETagToParams(undefined, {foo:'bar'}).should.eql({foo:'bar'});
+	});
+
+	it('should handle non existing ETag and params.', function () {
+		should.not.exist(s.applyETagToParams(undefined, undefined));
+	});
+
+	it('should handle non existing params.', function () {
+		should.not.exist(s.applyETagToParams('etag', undefined));
+	});
+
+	it('should create headers and assign ETag inplace.', function () {
+		var params;
+
+		params = {};
+		s.applyETagToParams('etag', params).should.eql(params);
+		params.headers['If-None-Match'].should.equal('etag');
+	});
+
+	it('should not override existing headers.', function () {
+		var params;
+
+		params = {
+			headers:{
+				foo:'bar'
+			}
+		};
+		s.applyETagToParams('etag', params).should.eql(params);
+		params.headers['If-None-Match'].should.equal('etag');
+		params.headers.foo.should.equal('bar');
+	});
 });
 
 describe('Service method to fetch all tickets', function() {
