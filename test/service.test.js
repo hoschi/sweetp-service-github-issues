@@ -278,7 +278,7 @@ describe('Transform ticket response', function() {
     it('should only pick certain properties.', function() {
         var completeGithubTicket;
 
-        completeGithubTicket = require('fixtures/complete_github_ticket.js');
+        completeGithubTicket = require('../fixtures/complete_github_ticket.js');
 
         s.transformTicketResponse(completeGithubTicket).should.eql({
             description: "I'm having a problem with this.",
@@ -315,7 +315,7 @@ describe('Service method to fetch all tickets', function() {
 		params = _.cloneDeep(baseParams);
 
 		//nock.recorder.rec({ dont_print:true });
-		require('fixtures/method_all.js');
+		require('../fixtures/method_all.js');
         s.all(null, params, function(err, data) {
             should.not.exist(err);
             data.should.has.length(30);
@@ -323,7 +323,7 @@ describe('Service method to fetch all tickets', function() {
             should.not.exist(data[0].html_url);
 
 			//var fs = require('fs');
-			//fs.writeFileSync('fixtures/method_all.js', "var nock = require('nock');\n" + nock.recorder.play().join('\n'));
+			//fs.writeFileSync('../fixtures/method_all.js', "var nock = require('nock');\n" + nock.recorder.play().join('\n'));
             done();
         });
 
@@ -335,7 +335,7 @@ describe('Service method to fetch all tickets', function() {
 		params.withAllProperties = 'true';
 
 		//nock.recorder.rec({ dont_print:true });
-		require('fixtures/method_all_with_all_props.js');
+		require('../fixtures/method_all_with_all_props.js');
         s.all(null, params, function(err, data) {
             should.not.exist(err);
             data.should.has.length(30);
@@ -343,7 +343,7 @@ describe('Service method to fetch all tickets', function() {
             data[0].html_url.should.equal('https://github.com/sweetp/dashboard/issues/33');
 
 			//var fs = require('fs');
-			//fs.writeFileSync('fixtures/method_all_with_all_props.js', "var nock = require('nock');\n" + nock.recorder.play().join('\n'));
+			//fs.writeFileSync('../fixtures/method_all_with_all_props.js', "var nock = require('nock');\n" + nock.recorder.play().join('\n'));
             done();
         });
 
@@ -355,7 +355,7 @@ describe('Service method to fetch all tickets', function() {
 		params.state = 'open';
 
 		//nock.recorder.rec({ dont_print:true });
-		require('fixtures/method_all_state_open.js');
+		require('../fixtures/method_all_state_open.js');
         s.all(null, params, function(err, data) {
             should.not.exist(err);
 			data.forEach(function(item) {
@@ -363,7 +363,7 @@ describe('Service method to fetch all tickets', function() {
 			});
 
 			//var fs = require('fs');
-			//fs.writeFileSync('fixtures/method_all_state_open.js', "var nock = require('nock');\n" + nock.recorder.play().join('\n'));
+			//fs.writeFileSync('../fixtures/method_all_state_open.js', "var nock = require('nock');\n" + nock.recorder.play().join('\n'));
             done();
         });
     });
@@ -374,7 +374,7 @@ describe('Service method to fetch all tickets', function() {
 		params.state = 'closed';
 
 		//nock.recorder.rec({ dont_print:true });
-		require('fixtures/method_all_state_closed.js');
+		require('../fixtures/method_all_state_closed.js');
         s.all(null, params, function(err, data) {
             should.not.exist(err);
 			data.forEach(function(item) {
@@ -382,7 +382,7 @@ describe('Service method to fetch all tickets', function() {
 			});
 
 			//var fs = require('fs');
-			//fs.writeFileSync('fixtures/method_all_state_closed.js', "var nock = require('nock');\n" + nock.recorder.play().join('\n'));
+			//fs.writeFileSync('../fixtures/method_all_state_closed.js', "var nock = require('nock');\n" + nock.recorder.play().join('\n'));
             done();
         });
     });
