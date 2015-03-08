@@ -133,9 +133,8 @@ exports.callWithCache = function (id, get, callback) {
 	}, callback);
 };
 
-exports.all = function (err, params, callback) {
+exports.all = function (params, callback) {
 	var parseResponse;
-	if (err) { return callback(err); }
 
 	if (params.withAllProperties === 'true') {
 		// give all data directly to the client

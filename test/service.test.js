@@ -549,20 +549,13 @@ describe('Service method to fetch all tickets', function() {
         }
     };
 
-    it("doesn't handle errors.", function(done) {
-        s.all(true, undefined, function(err) {
-            err.should.equal(true);
-            done();
-        });
-    });
-
     it('should fetch all tickets by default.', function(done) {
 		var params;
 		params = _.cloneDeep(baseParams);
 
 		//nock.recorder.rec({ dont_print:true });
 		require('../fixtures/method_all.js');
-        s.all(null, params, function(err, data) {
+        s.all(params, function(err, data) {
             should.not.exist(err);
             data.should.has.length(30);
             data[0].title.should.equal('commit widget bug');
@@ -582,7 +575,7 @@ describe('Service method to fetch all tickets', function() {
 
 		//nock.recorder.rec({ dont_print:true });
 		require('../fixtures/method_all_with_all_props.js');
-        s.all(null, params, function(err, data) {
+        s.all(params, function(err, data) {
             should.not.exist(err);
             data.should.has.length(30);
             data[0].title.should.equal('commit widget bug');
@@ -602,7 +595,7 @@ describe('Service method to fetch all tickets', function() {
 
 		//nock.recorder.rec({ dont_print:true });
 		require('../fixtures/method_all_state_open.js');
-        s.all(null, params, function(err, data) {
+        s.all(params, function(err, data) {
             should.not.exist(err);
 			data.forEach(function(item) {
 				item.state.should.equal('open');
@@ -621,7 +614,7 @@ describe('Service method to fetch all tickets', function() {
 
 		//nock.recorder.rec({ dont_print:true });
 		require('../fixtures/method_all_state_closed.js');
-        s.all(null, params, function(err, data) {
+        s.all(params, function(err, data) {
             should.not.exist(err);
 			data.forEach(function(item) {
 				item.state.should.equal('closed');
