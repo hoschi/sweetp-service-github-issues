@@ -1,6 +1,6 @@
 {
   "name": "sweetp-github-issues",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "main": "main.js",
   "description": "Sweetp service for Github issues.",
   "homepage": "https://github.com/sweetp/service-github-issues",
