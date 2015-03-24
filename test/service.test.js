@@ -226,6 +226,21 @@ describe('Get credentials', function() {
         }
     };
 
+    it('should lead to error when password save is locked.', function(done) {
+        nock(params.url)
+            .get('/services/' + params.config.name + '/' + s.defaultCredentialService + "?key=github")
+            .reply(500, {
+                service: 'Password safe locked, no credentials for you!'
+            });
+
+        s.getCredentials(params, function(err, credentials) {
+			err.should.match(/safe locked/);
+            should.not.exist(credentials);
+
+            done();
+        });
+    });
+
     it('should work without configuration.', function(done) {
         nock(params.url)
             .get('/services/' + params.config.name + '/' + s.defaultCredentialService + "?key=github")
@@ -549,6 +564,24 @@ describe('Service method to fetch all tickets', function() {
         }
     };
 
+    it('should lead to error when no credentials returned from password safe.', function(done) {
+		var params;
+		params = _.cloneDeep(baseParams);
+
+        nock(params.url)
+            .get('/services/' + params.config.name + '/' + s.defaultCredentialService + "?key=github")
+            .reply(500, {
+                service: 'Password safe locked, no credentials for you!'
+            });
+
+        s.all(params, function(err, data) {
+			err.should.match(/safe locked/);
+            should.not.exist(data);
+
+            done();
+        });
+    });
+
     it('should fetch all tickets by default.', function(done) {
 		var params;
 		params = _.cloneDeep(baseParams);
@@ -565,7 +598,6 @@ describe('Service method to fetch all tickets', function() {
 			//fs.writeFileSync('../fixtures/method_all.js', "var nock = require('nock');\n" + nock.recorder.play().join('\n'));
             done();
         });
-
     });
 
     it('should be able to fetch all properties.', function(done) {
@@ -585,7 +617,6 @@ describe('Service method to fetch all tickets', function() {
 			//fs.writeFileSync('../fixtures/method_all_with_all_props.js', "var nock = require('nock');\n" + nock.recorder.play().join('\n'));
             done();
         });
-
     });
 
     it('should has a param to fetch tickets with a different state (open).', function(done) {

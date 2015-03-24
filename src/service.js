@@ -153,6 +153,10 @@ exports.all = function (params, callback) {
 	exports.getCredentials(params, function (err, credentials) {
 		var github, apiParams, overrides, cacheKey;
 
+		if (err) {
+			return callback(err);
+		}
+
 		// initialize api
 		github = new GithubApi(exports.config.githubApi);
 		github.authenticate(_.assign({type:'basic'}, credentials));
